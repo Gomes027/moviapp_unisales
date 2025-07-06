@@ -40,7 +40,13 @@ interface Trailer {
 
 type FilterOption = 'popular' | 'top_rated' | 'now_playing' | 'release_date' | 'trending';
 
-export const useMovies = (filter: FilterOption, selectedGenre: number | null, page: number) => {
+// ⬇️ Adicionado parâmetro `search`
+export const useMovies = (
+  filter: FilterOption,
+  selectedGenre: number | null,
+  page: number,
+  search?: string
+) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -66,34 +72,38 @@ export const useMovies = (filter: FilterOption, selectedGenre: number | null, pa
   useEffect(() => {
     setMovies([]);
     setHasMore(true);
-  }, [filter, selectedGenre]);
+  }, [filter, selectedGenre, search]);
 
   useEffect(() => {
     loadMovies();
-  }, [page, filter, selectedGenre]);
+  }, [page, filter, selectedGenre, search]);
 
   const loadMovies = async () => {
     if (loading || !hasMore) return;
 
     setLoading(true);
+
     let endpoint = `/movie/${filter === 'release_date' ? 'now_playing' : filter}`;
     if (filter === 'trending') endpoint = '/trending/movie/day';
     if (selectedGenre !== null) endpoint = '/discover/movie';
+    if (search) endpoint = '/search/movie'; // 🔍 busca por texto
 
     try {
       const { data } = await api.get(endpoint, {
         params: {
           page,
+          query: search || undefined,
           with_genres: selectedGenre ?? undefined,
         },
       });
 
-      const newMovies = filter === 'release_date'
-        ? data.results.sort(
-            (a: Movie, b: Movie) =>
-              new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
-          )
-        : data.results;
+      const newMovies =
+        filter === 'release_date' && !search
+          ? data.results.sort(
+              (a: Movie, b: Movie) =>
+                new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
+            )
+          : data.results;
 
       setMovies((prev) => [...prev, ...newMovies]);
 
@@ -136,7 +146,6 @@ export const useMovies = (filter: FilterOption, selectedGenre: number | null, pa
     genres,
     hasMore,
     loading,
-    // 🔽 Detalhes expostos
     movieDetails,
     cast,
     trailer,

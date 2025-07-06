@@ -1,6 +1,6 @@
 import '@fontsource/poppins/400.css';
 import '@fontsource/poppins/700.css';
-import './index.css';
+import './styles/Index.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

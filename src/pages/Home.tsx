@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMovies } from '../hooks/useMovies';
 import Filters from '../components/Filters';
 import MovieCard from '../components/MovieCard';
@@ -8,13 +8,19 @@ export default function Home() {
   const [filter, setFilter] = useState<'now_playing' | 'popular' | 'top_rated' | 'release_date' | 'trending'>('now_playing');
   const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  const { movies, genres, hasMore, loading } = useMovies(filter, selectedGenre, page);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
 
-  const filteredMovies = movies.filter((movie) =>
-    movie.title.toLowerCase().includes(search.toLowerCase())
-  );
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const { movies, genres, hasMore, loading } = useMovies(filter, selectedGenre, page, debouncedSearch);
 
   return (
     <div className="home-container">
@@ -34,7 +40,7 @@ export default function Home() {
       />
 
       <div className="home-grid">
-        {filteredMovies.map((movie) => (
+        {movies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} genres={genres} />
         ))}
       </div>
