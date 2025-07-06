@@ -40,7 +40,6 @@ interface Trailer {
 
 type FilterOption = 'popular' | 'top_rated' | 'now_playing' | 'release_date' | 'trending';
 
-// ⬇️ Adicionado parâmetro `search`
 export const useMovies = (
   filter: FilterOption,
   selectedGenre: number | null,
@@ -105,7 +104,13 @@ export const useMovies = (
             )
           : data.results;
 
-      setMovies((prev) => [...prev, ...newMovies]);
+      setMovies((prev) => {
+        const todos = [...prev, ...newMovies];
+        const unicos = todos.filter(
+          (filme, index, self) => index === self.findIndex((f) => f.id === filme.id)
+        );
+        return unicos;
+      });
 
       if (data.page >= data.total_pages || newMovies.length === 0) {
         setHasMore(false);

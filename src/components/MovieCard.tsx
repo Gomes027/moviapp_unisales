@@ -26,7 +26,9 @@ export default function MovieCard({ movie, genres }: MovieCardProps) {
       <div className="movie-info">
         <p className="movie-title">{movie.title}</p>
         <p className="movie-rating">⭐ {movie.vote_average.toFixed(1)}</p>
-        <p className="movie-date">{movie.release_date}</p>
+        <p className="movie-date">
+          {new Date(movie.release_date).toLocaleDateString('pt-BR')}
+        </p>
         <p className="movie-genres">🎭 {getGenreNames(movie.genre_ids)}</p>
       </div>
     </Link>
